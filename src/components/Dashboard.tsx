@@ -8,6 +8,7 @@ import Section from "./Section";
 import SectionTabs from "./SectionTabs";
 import ChannelSearch from "./ChannelSearch";
 import VideoModal from "./VideoModal";
+import RefreshButton from "./RefreshButton";
 
 export default function Dashboard({ userEmail }: { userEmail: string }) {
   const supabase = createClient();
@@ -107,12 +108,12 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
           <h1 className="text-2xl tracking-tight">Focus</h1>
           <p className="text-sm text-muted">{userEmail}</p>
         </div>
-        <button
-          onClick={signOut}
-          className="text-sm text-muted underline underline-offset-4 hover:text-ink"
-        >
-          Sign out
-        </button>
+        <div className="flex items-center gap-4">
+          <RefreshButton onRefreshed={() => loadFeed()} />
+          <button onClick={signOut} className="text-sm text-muted underline underline-offset-4 hover:text-ink">
+            Sign out
+          </button>
+        </div>
       </header>
 
       {loading ? (
