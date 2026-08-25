@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  background-color: #f7f5f2;
+}
+
+body {
+  color: #2b2a28;
+}
+
+::selection {
+  background: #e6e2da;
+}
+
+/* Minimal scrollbar so the calm aesthetic holds on desktop too */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #e6e2da;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
