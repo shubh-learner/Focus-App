@@ -56,13 +56,9 @@ export default function RefreshButton({ onRefreshed }: { onRefreshed: () => void
       <button
         onClick={handleClick}
         disabled={disabled}
-        className="rounded-md border border-line bg-card px-3 py-1.5 text-xs text-ink hover:bg-paper disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading
-          ? "Refreshing…"
-          : disabled && nextAllowedAt
-          ? `Refresh in ${formatRemaining(nextAllowedAt - now)}`
-          : "Refresh videos"}
+        title={disabled && nextAllowedAt ? `Refresh in ${formatRemaining(nextAllowedAt - now)}` : undefined}
+        className="rounded-md border border-line bg-card px-3 py-1.5 text-xs text-ink hover:bg-paper disabled:cursor-not-allowed disabled:opacity-50">
+        {loading ? "Refreshing…" : "Refresh"}
       </button>
       {error && <span className="text-xs text-red-700">{error}</span>}
     </div>
