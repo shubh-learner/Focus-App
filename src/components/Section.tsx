@@ -14,8 +14,10 @@ export default function Section({
   onAddChannels: () => void;
   onPlay: (video: Video) => void;
 }) {
-  const videos = data.channels.flatMap((c) =>
-    c.videos.map((v) => ({ video: v, channel: c.channel }))
+  const videos = data.channels
+  .flatMap((c) => c.videos.map((v) => ({ video: v, channel: c.channel })))
+  .sort(
+    (a, b) => new Date(b.video.published_at).getTime() - new Date(a.video.published_at).getTime()
   );
 
   return (
