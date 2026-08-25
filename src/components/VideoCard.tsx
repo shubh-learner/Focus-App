@@ -37,7 +37,7 @@ export default function VideoCard({
             alt={video.title}
             fill
             sizes="(max-width: 768px) 100vw, 320px"
-            className="object-cover transition duration-300 group-hover:scale-[1.02]"
+            className="object-cover grayscale transition duration-300 group-hover:scale-[1.02] group-hover:grayscale-0 group-active:grayscale-0"
           />
         )}
       </div>
