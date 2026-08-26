@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase, createAdminSupabase } from "@/lib/supabase/server"
-import { getChannelDetails, getLatestUploads } from "@/lib/youtube";
+import { getChannelDetails, getLatestUploads, getVideoDurations } from "@/lib/youtube";
 
 // Subscribe: body = { sectionId, channelId, channelTitle, channelThumbnail }
 // If this is the first time ANYONE has subscribed to this channel, we resolve
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
 
       const uploads = await getLatestUploads(details.uploadsPlaylistId);
       if (uploads.length) {
+        const durations = await getVideoDurations(uploads.map((v) => v.videoId));
         await admin.from("videos").upsert(
           uploads.map((v) => ({
             channel_id: details.channelId,
@@ -46,10 +47,12 @@ export async function POST(request: NextRequest) {
             title: v.title,
             thumbnail_url: v.thumbnailUrl,
             published_at: v.publishedAt,
+            duration_seconds: durations.get(v.videoId) ?? null,
           })),
           { onConflict: "channel_id,video_id" }
         );
       }
+
       await admin
         .from("channels")
         .update({ last_fetched_at: new Date().toISOString() })

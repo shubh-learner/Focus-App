@@ -119,6 +119,40 @@ export async function getLatestUploads(
     }));
 }
 
+// Costs 1 unit per call regardless of batch size (up to 50 video IDs).
+// Called with ALL video IDs from a refresh/subscribe batch at once —
+// never per-video — to keep quota cost minimal.
+export async function getVideoDurations(videoIds: string[]): Promise<Map<string, number>> {
+  const result = new Map<string, number>();
+  if (videoIds.length === 0) return result;
+
+  for (let i = 0; i < videoIds.length; i += 50) {
+    const batch = videoIds.slice(i, i + 50);
+    const url = new URL(`${API_BASE}/videos`);
+    url.searchParams.set("part", "contentDetails");
+    url.searchParams.set("id", batch.join(","));
+    url.searchParams.set("key", apiKey());
+
+    const res = await fetch(url.toString());
+    if (!res.ok) continue; // don't fail the whole refresh over a duration lookup
+    const data = await res.json();
+    for (const item of data.items ?? []) {
+      result.set(item.id, parseIsoDuration(item.contentDetails.duration));
+    }
+  }
+  return result;
+}
+
+// Parses ISO 8601 durations like "PT1H2M3S" into total seconds.
+function parseIsoDuration(iso: string): number {
+  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  const hours = parseInt(match[1] ?? "0", 10);
+  const minutes = parseInt(match[2] ?? "0", 10);
+  const seconds = parseInt(match[3] ?? "0", 10);
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
 // Converts a "UC..." channel ID into its "UU..." uploads playlist ID without
 // any API call. This shortcut works for the vast majority of channels and is
 // used as a fast fallback; getChannelDetails() remains the authoritative path

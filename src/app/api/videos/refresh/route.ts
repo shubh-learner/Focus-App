@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase, createAdminSupabase } from "@/lib/supabase/server";
-import { getLatestUploads, uploadsPlaylistIdFromChannelId } from "@/lib/youtube";
+import { getLatestUploads, uploadsPlaylistIdFromChannelId, getVideoDurations, type PlaylistVideo } from "@/lib/youtube";
 
 const REFRESH_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
@@ -67,6 +67,8 @@ export async function POST() {
       .select("channel_id, uploads_playlist_id")
       .in("channel_id", channelIds);
 
+    const perChannelUploads: { channelId: string; uploads: PlaylistVideo[] }[] = [];
+
     for (const channel of channels ?? []) {
       const playlistId =
         channel.uploads_playlist_id ?? uploadsPlaylistIdFromChannelId(channel.channel_id);
@@ -74,18 +76,7 @@ export async function POST() {
 
       try {
         const uploads = await getLatestUploads(playlistId, 6);
-        if (uploads.length) {
-          await admin.from("videos").upsert(
-            uploads.map((v) => ({
-              channel_id: channel.channel_id,
-              video_id: v.videoId,
-              title: v.title,
-              thumbnail_url: v.thumbnailUrl,
-              published_at: v.publishedAt,
-            })),
-            { onConflict: "channel_id,video_id" }
-          );
-        }
+        perChannelUploads.push({ channelId: channel.channel_id, uploads });
         await admin
           .from("channels")
           .update({
@@ -97,6 +88,25 @@ export async function POST() {
       } catch (err: any) {
         errors.push({ channelId: channel.channel_id, message: err.message });
       }
+    }
+
+    // One batched call for every video found across every channel this refresh.
+    const allVideoIds = perChannelUploads.flatMap((c) => c.uploads.map((u) => u.videoId));
+    const durations = await getVideoDurations(allVideoIds);
+
+    for (const { channelId, uploads } of perChannelUploads) {
+      if (!uploads.length) continue;
+      await admin.from("videos").upsert(
+        uploads.map((v) => ({
+          channel_id: channelId,
+          video_id: v.videoId,
+          title: v.title,
+          thumbnail_url: v.thumbnailUrl,
+          published_at: v.publishedAt,
+          duration_seconds: durations.get(v.videoId) ?? null,
+        })),
+        { onConflict: "channel_id,video_id" }
+      );
     }
   }
 

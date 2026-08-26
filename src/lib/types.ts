@@ -29,6 +29,7 @@ export type Video = {
   title: string;
   thumbnail_url: string | null;
   published_at: string;
+  duration_seconds: number | null; 
 };
 
 // Shape returned by GET /api/videos — a section, its subscribed channels,

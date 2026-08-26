@@ -16,6 +16,14 @@ function timeAgo(iso: string) {
   return `${Math.floor(months / 12)}y ago`;
 }
 
+function formatDuration(totalSeconds: number) {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
 export default function VideoCard({
   video,
   channel,
@@ -43,8 +51,11 @@ export default function VideoCard({
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <p className="line-clamp-2 text-sm leading-snug text-ink">{video.title}</p>
-        <div className="mt-auto flex items-center justify-between pt-2 text-xs text-muted">
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2 text-xs text-muted">
           <span className="truncate">{channel.title}</span>
+          {video.duration_seconds != null && (
+            <span className="shrink-0 tabular-nums">{formatDuration(video.duration_seconds)}</span>
+          )}
           <span className="shrink-0">{timeAgo(video.published_at)}</span>
         </div>
       </div>
