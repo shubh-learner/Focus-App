@@ -119,9 +119,9 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
     <main className="mx-auto max-w-5xl px-6 py-10">
       <header className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl tracking-tight">Focus</h1>
-          <p className="text-sm text-muted">{userEmail}</p>
-        </div> 
+          <h1 className="text-[27px] tracking-tight">Focus</h1>
+          <p className="text-[13px] text-muted">{userEmail}</p>
+        </div>
         <div className="flex items-center gap-4">
           <button
             onClick={toggleColorful}
@@ -165,7 +165,7 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
             onRename={renameSection}
             onAddSection={addSection}
           />
-          
+
           {active && (
             <Section
               data={active}
