@@ -19,11 +19,25 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [searchingFor, setSearchingFor] = useState<string | null>(null);
   const [playing, setPlaying] = useState<Video | null>(null);
+  const [colorful, setColorful] = useState(false);
 
   useEffect(() => {
     loadFeed(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("focus:colorfulThumbnails");
+    if (saved === "true") setColorful(true);
+  }, []);
+
+  function toggleColorful() {
+    setColorful((prev) => {
+      const next = !prev;
+      localStorage.setItem("focus:colorfulThumbnails", String(next));
+      return next;
+    });
+  }
 
   async function loadFeed(preserveActive = true) {
     setLoading(true);
@@ -107,8 +121,19 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
         <div>
           <h1 className="text-2xl tracking-tight">Focus</h1>
           <p className="text-sm text-muted">{userEmail}</p>
-        </div>
+        </div> 
         <div className="flex items-center gap-4">
+          <button
+            onClick={toggleColorful}
+            className={`rounded-md border px-3 py-1.5 text-xs transition ${
+              colorful
+                ? "border-ink bg-ink text-paper"
+                : "border-line bg-card text-muted hover:text-ink"
+            }`}
+            title="Toggle colorful thumbnails"
+          >
+            {colorful ? "Color: On" : "Color: Off"}
+          </button>
           <RefreshButton onRefreshed={() => loadFeed()} />
           <button onClick={signOut} className="text-sm text-muted underline underline-offset-4 hover:text-ink">
             Sign out
@@ -140,10 +165,11 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
             onRename={renameSection}
             onAddSection={addSection}
           />
-
+          
           {active && (
             <Section
               data={active}
+              colorful={colorful}
               onDelete={() => deleteSection(active.section.id)}
               onAddChannels={() => setSearchingFor(active.section.id)}
               onPlay={setPlaying}

@@ -53,12 +53,25 @@ export default function RefreshButton({ onRefreshed }: { onRefreshed: () => void
 
   return (
     <div className="flex items-center gap-2">
+      
       <button
         onClick={handleClick}
         disabled={disabled}
-        title={disabled && nextAllowedAt ? `Refresh in ${formatRemaining(nextAllowedAt - now)}` : undefined}
-        className="rounded-md border border-line bg-card px-3 py-1.5 text-xs text-ink hover:bg-paper disabled:cursor-not-allowed disabled:opacity-50">
-        {loading ? "Refreshing…" : "Refresh"}
+        aria-label="Refresh videos"
+        title={disabled && nextAllowedAt ? `Refresh in ${formatRemaining(nextAllowedAt - now)}` : "Refresh videos"}
+        className="rounded-md border border-line bg-card p-2 text-ink hover:bg-paper disabled:cursor-not-allowed disabled:opacity-50">
+        <svg
+          viewBox="0 0 24 24"
+          className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+          <path d="M21 3v6h-6" />
+        </svg>
       </button>
       {error && <span className="text-xs text-red-700">{error}</span>}
     </div>

@@ -5,11 +5,13 @@ import VideoCard from "./VideoCard";
 
 export default function Section({
   data,
+  colorful,
   onDelete,
   onAddChannels,
   onPlay,
 }: {
   data: SectionFeed;
+  colorful: boolean;
   onDelete: () => void;
   onAddChannels: () => void;
   onPlay: (video: Video) => void;
@@ -45,7 +47,7 @@ export default function Section({
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {videos.map(({ video, channel }) => (
-            <VideoCard key={video.id} video={video} channel={channel} onPlay={onPlay} />
+            <VideoCard key={video.id} video={video} channel={channel} colorful={colorful} onPlay={onPlay} />
           ))}
         </div>
       )}

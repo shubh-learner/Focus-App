@@ -27,10 +27,12 @@ function formatDuration(totalSeconds: number) {
 export default function VideoCard({
   video,
   channel,
+  colorful,
   onPlay,
 }: {
   video: Video;
   channel: Channel;
+  colorful: boolean;
   onPlay: (video: Video) => void;
 }) {
   return (
@@ -45,7 +47,9 @@ export default function VideoCard({
             alt={video.title}
             fill
             sizes="(max-width: 768px) 100vw, 320px"
-            className="object-cover grayscale transition duration-300 group-hover:scale-[1.02] group-hover:grayscale-0 group-active:grayscale-0"
+            className={`object-cover transition duration-300 group-hover:scale-[1.02] ${
+              colorful ? "" : "grayscale group-hover:grayscale-0 group-active:grayscale-0"
+            }`}
           />
         )}
       </div>
