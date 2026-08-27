@@ -72,7 +72,7 @@ export default function Section({
 
         <div className="flex shrink-0 items-center gap-1 text-xs text-muted">
           <button onClick={onAddChannels} className="rounded px-2 py-1 hover:bg-line/60">
-            + Channel
+            +- Channel
           </button>
           <button
             onClick={onDelete}
