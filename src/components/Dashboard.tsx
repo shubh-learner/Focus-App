@@ -172,6 +172,7 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
               colorful={colorful}
               onDelete={() => deleteSection(active.section.id)}
               onAddChannels={() => setSearchingFor(active.section.id)}
+              onKeywordsChanged={() => loadFeed()}
               onPlay={setPlaying}
             />
           )}

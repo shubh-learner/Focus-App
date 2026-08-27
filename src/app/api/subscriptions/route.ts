@@ -107,3 +107,35 @@ export async function DELETE(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
+
+// Save/update the keyword filter for one user's subscription to a channel
+// under a specific section. body = { sectionId, channelId, keywords: string[] }
+export async function PATCH(request: NextRequest) {
+  const supabase = createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { sectionId, channelId, keywords } = await request.json();
+  if (!sectionId || !channelId || !Array.isArray(keywords)) {
+    return NextResponse.json(
+      { error: "sectionId, channelId, and keywords[] are required" },
+      { status: 400 }
+    );
+  }
+
+  const cleaned = keywords.map((k: string) => k.trim()).filter(Boolean);
+
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .update({ keywords: cleaned })
+    .eq("user_id", user.id)
+    .eq("section_id", sectionId)
+    .eq("channel_id", channelId)
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ subscription: data });
+}

@@ -3,7 +3,6 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import type { SectionFeed } from "@/lib/types";
 
 // Reads purely from the Supabase cache — costs 0 YouTube API units.
-// This is the route the dashboard calls on every load.
 export async function GET() {
   const supabase = createServerSupabase();
   const {
@@ -19,7 +18,7 @@ export async function GET() {
 
   const { data: subs, error: subsErr } = await supabase
     .from("subscriptions")
-    .select("section_id, channel_id");
+    .select("section_id, channel_id, keywords");
   if (subsErr) return NextResponse.json({ error: subsErr.message }, { status: 500 });
 
   const channelIds = Array.from(new Set((subs ?? []).map((s) => s.channel_id)));
@@ -46,19 +45,31 @@ export async function GET() {
   }
 
   const feed: SectionFeed[] = (sections ?? []).map((section) => {
-    const channelIdsForSection = (subs ?? [])
-      .filter((s) => s.section_id === section.id)
-      .map((s) => s.channel_id);
+    const subsForSection = (subs ?? []).filter((s) => s.section_id === section.id);
 
     return {
       section,
-      channels: channelIdsForSection
-        .map((cid) => channelById.get(cid))
-        .filter(Boolean)
-        .map((channel) => ({
-          channel,
-          videos: videosByChannel.get(channel.channel_id) ?? [],
-        })),
+      channels: subsForSection
+        .map((sub) => {
+          const channel = channelById.get(sub.channel_id);
+          if (!channel) return null;
+
+          const allVideos = videosByChannel.get(sub.channel_id) ?? [];
+          const keywords = ((sub.keywords ?? []) as string[])
+            .map((k) => k.trim())
+            .filter(Boolean);
+
+          // OR matching across keywords, case-insensitive, title only.
+          // Empty keywords = unchanged existing behavior (show everything).
+          const videosForChannel = keywords.length
+            ? allVideos.filter((v) =>
+                keywords.some((k) => v.title.toLowerCase().includes(k.toLowerCase()))
+              )
+            : allVideos;
+
+          return { channel, videos: videosForChannel, keywords };
+        })
+        .filter((c): c is NonNullable<typeof c> => c !== null),
     };
   });
 

@@ -39,5 +39,6 @@ export type SectionFeed = {
   channels: {
     channel: Channel;
     videos: Video[];
+    keywords: string[];
   }[];
 };
