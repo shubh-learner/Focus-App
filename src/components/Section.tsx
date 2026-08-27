@@ -51,7 +51,7 @@ export default function Section({
               onClick={() => setEditingChannelId(c.channel.channel_id)}
               className={`relative h-8 w-8 shrink-0 overflow-hidden rounded-full border-2 transition hover:opacity-80 ${
                 c.keywords.length ? "border-accent" : "border-line"
-              }`}
+              } ${colorful ? "" : "grayscale hover:grayscale-0"}`}
               title={
                 c.keywords.length
                   ? `${c.channel.title} — filtering: ${c.keywords.join(", ")}`
