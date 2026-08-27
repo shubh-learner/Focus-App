@@ -54,7 +54,7 @@ export default function VideoModal({
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: video.video_id,
         playerVars: {
-          autoplay: 0, // no autoplay — the person chooses when to press play
+          autoplay: 1, // 0 :no autoplay , 1 : autoplay
           rel: 0, // limit related videos shown at the end to the same channel
           modestbranding: 1,
           fs: 1,
