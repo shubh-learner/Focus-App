@@ -53,6 +53,12 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
     setLoading(false);
   }
 
+function applyFeed(newFeed: SectionFeed[]) {
+  setFeed(newFeed);
+  const stillExists = newFeed.some((f) => f.section.id === activeSectionId);
+  if (!stillExists) setActiveSectionId(newFeed[0]?.section.id ?? null);
+}
+
   async function addSection() {
     const name = window.prompt("Name this section (e.g. News, Spirituality, Technical):");
     if (!name || !name.trim()) return;
@@ -134,7 +140,7 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
           >
             {colorful ? "Color: On" : "Color: Off"}
           </button>
-          <RefreshButton onRefreshed={() => loadFeed()} />
+          <RefreshButton onRefreshed={applyFeed} />
           <button onClick={signOut} className="text-sm text-muted underline underline-offset-4 hover:text-ink">
             Sign out
           </button>

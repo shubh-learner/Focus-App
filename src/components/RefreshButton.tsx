@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { SectionFeed } from "@/lib/types";
 
 function formatRemaining(ms: number) {
   const totalMinutes = Math.max(0, Math.ceil(ms / 60000));
@@ -9,7 +10,7 @@ function formatRemaining(ms: number) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-export default function RefreshButton({ onRefreshed }: { onRefreshed: () => void }) {
+export default function RefreshButton({ onRefreshed }: { onRefreshed: (feed: SectionFeed[]) => void }) {
   const [nextAllowedAt, setNextAllowedAt] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ export default function RefreshButton({ onRefreshed }: { onRefreshed: () => void
         return;
       }
       setNextAllowedAt(new Date(data.nextAllowedAt).getTime());
-      onRefreshed();
+      onRefreshed(data.feed);
     } catch {
       setError("Refresh failed. Try again.");
     } finally {
