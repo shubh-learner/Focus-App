@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { SectionFeed, Video } from "@/lib/types";
@@ -9,6 +9,7 @@ import SectionTabs from "./SectionTabs";
 import ChannelSearch from "./ChannelSearch";
 import VideoModal from "./VideoModal";
 import RefreshButton from "./RefreshButton";
+
 
 export default function Dashboard({ userEmail }: { userEmail: string }) {
   const supabase = createClient();
@@ -20,6 +21,20 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
   const [searchingFor, setSearchingFor] = useState<string | null>(null);
   const [playing, setPlaying] = useState<Video | null>(null);
   const [colorful, setColorful] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function openSettings() {
+    setSettingsOpen(true);
+    if (settingsTimerRef.current) clearTimeout(settingsTimerRef.current);
+    settingsTimerRef.current = setTimeout(() => setSettingsOpen(false), 5000);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (settingsTimerRef.current) clearTimeout(settingsTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     loadFeed(false);
@@ -130,15 +145,23 @@ function applyFeed(newFeed: SectionFeed[]) {
         </div>
         <div className="flex items-center gap-4">
           <button
-            onClick={toggleColorful}
-            className={`rounded-md border px-3 py-1.5 text-xs transition ${
-              colorful
-                ? "border-ink bg-ink text-paper"
-                : "border-line bg-card text-muted hover:text-ink"
-            }`}
-            title="Toggle colorful thumbnails"
+            onClick={openSettings}
+            aria-label="Settings"
+            title="Settings"
+            className="rounded-md border border-line bg-card p-2 text-muted hover:text-ink"
           >
-            {colorful ? "Color: On" : "Color: Off"}
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
           </button>
           <RefreshButton onRefreshed={applyFeed} />
           <button onClick={signOut} className="text-sm text-muted underline underline-offset-4 hover:text-ink">
@@ -146,6 +169,28 @@ function applyFeed(newFeed: SectionFeed[]) {
           </button>
         </div>
       </header>
+      <div
+        onClick={openSettings}
+        className={`overflow-hidden transition-all duration-300 ease-out ${
+          settingsOpen ? "mb-6 max-h-20 translate-y-0 opacity-100" : "mb-0 max-h-0 -translate-y-2 opacity-0"
+        }`}
+      >
+        <div className="flex items-center gap-3 rounded-md border border-line bg-card px-4 py-3">
+          <span className="text-xs text-muted">Color</span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleColorful();
+              openSettings();
+            }}
+            className={`rounded-md border px-3 py-1.5 text-xs transition ${
+              colorful ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
+            }`}
+          >
+            {colorful ? "On" : "Off"}
+          </button>
+        </div>
+      </div>
 
       {loading ? (
         <p className="text-sm text-muted">Loading your feed…</p>
