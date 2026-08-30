@@ -190,36 +190,30 @@ function applyFeed(newFeed: SectionFeed[]) {
         }`}
       >
         <div className="flex flex-wrap items-center gap-6 rounded-md border border-line bg-card px-4 py-3">
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted">Color</span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleColorful();
-                openSettings();
-              }}
-              className={`rounded-md border px-3 py-1.5 text-xs transition ${
-                colorful ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
-              }`}
-            >
-              {colorful ? "On" : "Off"}
-            </button>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted">Fullscreen playback</span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFullscreen();
-                openSettings();
-              }}
-              className={`rounded-md border px-3 py-1.5 text-xs transition ${
-                fullscreenEnabled ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
-              }`}
-            >
-              {fullscreenEnabled ? "On" : "Off"}
-            </button>
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleColorful();
+              openSettings();
+            }}
+            className={`rounded-md border px-3 py-1.5 text-xs transition ${
+              colorful ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
+            }`}
+          >
+            Color
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFullscreen();
+              openSettings();
+            }}
+            className={`rounded-md border px-3 py-1.5 text-xs transition ${
+              fullscreenEnabled ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
+            }`}
+          >
+            Fullscreen
+          </button>
         </div>
       </div>
 
