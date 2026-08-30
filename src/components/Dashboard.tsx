@@ -21,6 +21,7 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
   const [searchingFor, setSearchingFor] = useState<string | null>(null);
   const [playing, setPlaying] = useState<Video | null>(null);
   const [colorful, setColorful] = useState(false);
+  const [fullscreenEnabled, setFullscreenEnabled] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -50,6 +51,19 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
     setColorful((prev) => {
       const next = !prev;
       localStorage.setItem("focus:colorfulThumbnails", String(next));
+      return next;
+    });
+  }
+
+  useEffect(() => {
+    const saved = localStorage.getItem("focus:fullscreenPlayback");
+    if (saved === "true") setFullscreenEnabled(true);
+  }, []);
+
+  function toggleFullscreen() {
+    setFullscreenEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem("focus:fullscreenPlayback", String(next));
       return next;
     });
   }
@@ -175,20 +189,37 @@ function applyFeed(newFeed: SectionFeed[]) {
           settingsOpen ? "mb-6 max-h-20 translate-y-0 opacity-100" : "mb-0 max-h-0 -translate-y-2 opacity-0"
         }`}
       >
-        <div className="flex items-center gap-3 rounded-md border border-line bg-card px-4 py-3">
-          <span className="text-xs text-muted">Color</span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleColorful();
-              openSettings();
-            }}
-            className={`rounded-md border px-3 py-1.5 text-xs transition ${
-              colorful ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
-            }`}
-          >
-            {colorful ? "On" : "Off"}
-          </button>
+        <div className="flex flex-wrap items-center gap-6 rounded-md border border-line bg-card px-4 py-3">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted">Color</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleColorful();
+                openSettings();
+              }}
+              className={`rounded-md border px-3 py-1.5 text-xs transition ${
+                colorful ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
+              }`}
+            >
+              {colorful ? "On" : "Off"}
+            </button>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted">Fullscreen playback</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFullscreen();
+                openSettings();
+              }}
+              className={`rounded-md border px-3 py-1.5 text-xs transition ${
+                fullscreenEnabled ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
+              }`}
+            >
+              {fullscreenEnabled ? "On" : "Off"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -240,7 +271,7 @@ function applyFeed(newFeed: SectionFeed[]) {
         />
       )}
 
-      <VideoModal video={playing} onClose={() => setPlaying(null)} />
+      <VideoModal video={playing} fullscreenEnabled={fullscreenEnabled} onClose={() => setPlaying(null)} />
     </main>
   );
 }

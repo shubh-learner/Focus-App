@@ -36,9 +36,11 @@ function loadYouTubeIframeAPI(): Promise<void> {
 
 export default function VideoModal({
   video,
+  fullscreenEnabled,
   onClose,
 }: {
   video: Video | null;
+  fullscreenEnabled: boolean;
   onClose: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -54,10 +56,24 @@ export default function VideoModal({
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: video.video_id,
         playerVars: {
-          autoplay: 1, // 0 :no autoplay , 1 : autoplay
+          autoplay: 1, // person already chose this video by clicking it, so play immediately
           rel: 0, // limit related videos shown at the end to the same channel
           modestbranding: 1,
           fs: 1,
+        },
+        events: {
+          onReady: () => {
+            if (!fullscreenEnabled) return;
+            const iframe = playerRef.current?.getIframe?.();
+            // Browsers only allow requestFullscreen() as a direct result of a
+            // user gesture (the click that opened this modal), which is
+            // satisfied here since this whole flow started with the video click.
+            iframe?.requestFullscreen?.().catch(() => {
+              // Some browsers/situations silently refuse (e.g. no user gesture
+              // detected, or fullscreen unsupported) — fail quietly rather than
+              // breaking playback, since the video still plays fine embedded.
+            });
+          },
         },
       });
     });
