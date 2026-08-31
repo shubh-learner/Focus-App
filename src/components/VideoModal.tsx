@@ -54,7 +54,7 @@ export default function VideoModal({
   const [dragging, setDragging] = useState(false);
   const touchStartYRef = useRef<number | null>(null);
   const videoAreaRef = useRef<HTMLDivElement | null>(null);
-  const DRAWER_PEEK = 140;
+  const DRAWER_PEEK = 250;
 
   useEffect(() => {
     setCurrentVideo(video);
