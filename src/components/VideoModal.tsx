@@ -53,6 +53,7 @@ export default function VideoModal({
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const touchStartYRef = useRef<number | null>(null);
+  const videoAreaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setCurrentVideo(video);
@@ -83,8 +84,7 @@ export default function VideoModal({
         events: {
           onReady: () => {
             if (!fullscreenEnabled) return;
-            const iframe = playerRef.current?.getIframe?.();
-            iframe?.requestFullscreen?.().catch(() => {});
+            videoAreaRef.current?.requestFullscreen?.().catch(() => {});
           },
         },
       });
@@ -163,7 +163,7 @@ export default function VideoModal({
           </button>
         </div>
 
-        <div className="relative aspect-video w-full overflow-hidden bg-black">
+        <div ref={videoAreaRef} className="relative aspect-video w-full overflow-hidden bg-black">
           <div ref={containerRef} className="h-full w-full" />
 
           {/* Full-width swipe strip along the bottom edge of the video.
@@ -234,7 +234,7 @@ export default function VideoModal({
                       onClick={() => selectVideo(v)}
                       aria-label={v.title}
                       title={v.title}
-                      className="relative aspect-video h-full shrink-0 snap-start overflow-hidden rounded-md bg-line transition hover:opacity-80"
+                      className="relative aspect-video h-full max-h-[25%] shrink-0 snap-start overflow-hidden rounded-md bg-line transition hover:opacity-80"
                     >
                       {v.thumbnail_url && (
                         <Image src={v.thumbnail_url} alt="" fill className="object-cover" />
