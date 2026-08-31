@@ -115,8 +115,10 @@ export default function VideoModal({
 
   function selectVideo(v: Video) {
     setCurrentVideo(v);
+    setDrawerOpen(false);
+    setDragY(0);
   }
-
+  
   function handleTouchStart(e: React.TouchEvent) {
     touchStartYRef.current = e.touches[0].clientY;
     setDragging(true);
