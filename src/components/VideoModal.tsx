@@ -54,16 +54,12 @@ export default function VideoModal({
   const [dragging, setDragging] = useState(false);
   const touchStartYRef = useRef<number | null>(null);
 
-  // A new video was opened from the dashboard grid (not from the drawer) —
-  // reset to a clean state.
   useEffect(() => {
     setCurrentVideo(video);
     setDrawerOpen(false);
     setDragY(0);
   }, [video]);
 
-  // Create/replace the actual YouTube player whenever the displayed video
-  // changes — whether that's from the grid or from picking a recommendation.
   useEffect(() => {
     if (!currentVideo) {
       playerRef.current?.destroy?.();
@@ -79,8 +75,8 @@ export default function VideoModal({
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: currentVideo.video_id,
         playerVars: {
-          autoplay: 1, // the person already chose this video, so play immediately
-          rel: 0, // limit related videos shown at the end to the same channel
+          autoplay: 1,
+          rel: 0,
           modestbranding: 1,
           fs: 1,
         },
@@ -118,7 +114,6 @@ export default function VideoModal({
 
   function selectVideo(v: Video) {
     setCurrentVideo(v);
-    // stay open so the person can keep browsing "up next" if they want
   }
 
   function handleTouchStart(e: React.TouchEvent) {
@@ -132,7 +127,6 @@ export default function VideoModal({
     if (!drawerOpen) {
       setDragY(Math.max(0, Math.min(delta, 320)));
     } else {
-      // drawer already open — allow swiping back down to close it
       setDragY(Math.max(0, Math.min(320 + delta, 320)));
     }
   }
@@ -169,31 +163,32 @@ export default function VideoModal({
           </button>
         </div>
 
-        <div
-          className="relative aspect-video w-full overflow-hidden bg-black"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
+        <div className="relative aspect-video w-full overflow-hidden bg-black">
           <div ref={containerRef} className="h-full w-full" />
 
+          {/* Full-width swipe strip along the bottom edge of the video.
+              Sits above the YouTube iframe (which otherwise swallows touch
+              events), so a swipe anywhere along this strip opens the panel. */}
           {!drawerOpen && recommendations.length > 0 && (
-            <button
+            <div
+              className="absolute inset-x-0 bottom-0 z-10 flex h-16 touch-none flex-col items-center justify-end gap-0.5 pb-2 text-white/80"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               onClick={() => {
                 setDrawerOpen(true);
                 setDragY(320);
               }}
-              className="absolute inset-x-0 bottom-2 flex flex-col items-center gap-0.5 text-white/80"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 15l-6-6-6 6" />
               </svg>
               <span className="text-[10px]">Swipe up for more</span>
-            </button>
+            </div>
           )}
 
           <div
-            className={`absolute inset-x-0 bottom-0 flex flex-col rounded-t-xl bg-card ${
+            className={`absolute inset-x-0 bottom-0 z-20 flex w-full flex-col rounded-t-xl bg-card ${
               dragging ? "" : "transition-transform duration-300 ease-out"
             }`}
             style={{
@@ -205,7 +200,12 @@ export default function VideoModal({
                 : "translateY(100%)",
             }}
           >
-            <div className="flex items-center justify-between border-b border-line px-4 py-2">
+            <div
+              className="flex touch-none items-center justify-between border-b border-line px-4 py-2"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               <span className="text-xs text-muted">Up next from your subscriptions</span>
               <button
                 onClick={() => {
@@ -221,29 +221,28 @@ export default function VideoModal({
               </button>
             </div>
 
-            <div className="flex-1 space-y-2 overflow-y-auto p-3">
-              {recommendations.length === 0 && (
+            <div className="flex-1 overflow-x-auto overflow-y-hidden p-3">
+              {recommendations.length === 0 ? (
                 <p className="p-4 text-center text-xs text-muted">
                   No other videos from your subscriptions yet.
                 </p>
+              ) : (
+                <div className="flex h-full snap-x snap-mandatory gap-3">
+                  {recommendations.map(({ video: v }) => (
+                    <button
+                      key={v.id}
+                      onClick={() => selectVideo(v)}
+                      aria-label={v.title}
+                      title={v.title}
+                      className="relative aspect-video h-full shrink-0 snap-start overflow-hidden rounded-md bg-line transition hover:opacity-80"
+                    >
+                      {v.thumbnail_url && (
+                        <Image src={v.thumbnail_url} alt="" fill className="object-cover" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               )}
-              {recommendations.map(({ video: v, channel: c }) => (
-                <button
-                  key={v.id}
-                  onClick={() => selectVideo(v)}
-                  className="flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-paper"
-                >
-                  <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md bg-line">
-                    {v.thumbnail_url && (
-                      <Image src={v.thumbnail_url} alt={v.title} fill className="object-cover" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-sm text-ink">{v.title}</p>
-                    <p className="mt-1 truncate text-xs text-muted">{c.title}</p>
-                  </div>
-                </button>
-              ))}
             </div>
           </div>
         </div>
