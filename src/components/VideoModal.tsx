@@ -235,7 +235,7 @@ export default function VideoModal({
                       onClick={() => selectVideo(v)}
                       aria-label={v.title}
                       title={v.title}
-                      className="relative aspect-video h-16 shrink-0 snap-start overflow-hidden rounded-md bg-line transition hover:opacity-80"
+                      className="relative aspect-video h-24 shrink-0 snap-start overflow-hidden rounded-md bg-line transition hover:opacity-80"
                     >
                       {v.thumbnail_url && (
                         <Image src={v.thumbnail_url} alt="" fill className="object-cover" />
