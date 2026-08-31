@@ -149,6 +149,15 @@ function applyFeed(newFeed: SectionFeed[]) {
   );
 
   const active = feed.find((f) => f.section.id === activeSectionId);
+  const seenVideoIds = new Set<string>();
+  const allVideos = feed
+    .flatMap((f) => f.channels.flatMap((c) => c.videos.map((v) => ({ video: v, channel: c.channel }))))
+    .filter(({ video }) => {
+      if (seenVideoIds.has(video.video_id)) return false;
+      seenVideoIds.add(video.video_id);
+      return true;
+    })
+    .sort((a, b) => new Date(b.video.published_at).getTime() - new Date(a.video.published_at).getTime());
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
@@ -265,7 +274,12 @@ function applyFeed(newFeed: SectionFeed[]) {
         />
       )}
 
-      <VideoModal video={playing} fullscreenEnabled={fullscreenEnabled} onClose={() => setPlaying(null)} />
+      <VideoModal
+        video={playing}
+        recommendedVideos={allVideos}
+        fullscreenEnabled={fullscreenEnabled}
+        onClose={() => setPlaying(null)}
+      />
     </main>
   );
 }
