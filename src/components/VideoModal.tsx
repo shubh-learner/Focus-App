@@ -54,6 +54,7 @@ export default function VideoModal({
   const [dragging, setDragging] = useState(false);
   const touchStartYRef = useRef<number | null>(null);
   const videoAreaRef = useRef<HTMLDivElement | null>(null);
+  const DRAWER_PEEK = 140;
 
   useEffect(() => {
     setCurrentVideo(video);
@@ -125,9 +126,9 @@ export default function VideoModal({
     if (touchStartYRef.current === null) return;
     const delta = touchStartYRef.current - e.touches[0].clientY; // positive = swiped up
     if (!drawerOpen) {
-      setDragY(Math.max(0, Math.min(delta, 320)));
+      setDragY(Math.max(0, Math.min(delta, DRAWER_PEEK)));
     } else {
-      setDragY(Math.max(0, Math.min(320 + delta, 320)));
+      setDragY(Math.max(0, Math.min(DRAWER_PEEK + delta, DRAWER_PEEK)));
     }
   }
 
@@ -136,7 +137,7 @@ export default function VideoModal({
     touchStartYRef.current = null;
     if (dragY > 90) {
       setDrawerOpen(true);
-      setDragY(320);
+      setDragY(DRAWER_PEEK);
     } else {
       setDrawerOpen(false);
       setDragY(0);
@@ -177,7 +178,7 @@ export default function VideoModal({
               onTouchEnd={handleTouchEnd}
               onClick={() => {
                 setDrawerOpen(true);
-                setDragY(320);
+                setDragY(DRAWER_PEEK);
               }}
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -187,12 +188,12 @@ export default function VideoModal({
             </div>
           )}
 
+
           <div
-            className={`absolute inset-x-0 bottom-0 z-20 flex w-full flex-col rounded-t-xl bg-card ${
+            className={`absolute inset-x-0 bottom-0 z-20 flex w-full flex-col rounded-t-xl border-t border-white/10 bg-card/10 backdrop-blur-md ${
               dragging ? "" : "transition-transform duration-300 ease-out"
             }`}
             style={{
-              height: "70%",
               transform: dragging
                 ? `translateY(calc(100% - ${dragY}px))`
                 : drawerOpen
@@ -201,18 +202,18 @@ export default function VideoModal({
             }}
           >
             <div
-              className="flex touch-none items-center justify-between border-b border-line px-4 py-2"
+              className="flex touch-none items-center justify-between border-b border-white/10 px-4 py-2"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
-              <span className="text-xs text-muted">Up next from your subscriptions</span>
+              <span className="text-xs text-white/70">Up next from your subscriptions</span>
               <button
                 onClick={() => {
                   setDrawerOpen(false);
                   setDragY(0);
                 }}
-                className="text-muted hover:text-ink"
+                className="text-white/70 hover:text-white"
                 aria-label="Hide recommendations"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -221,20 +222,20 @@ export default function VideoModal({
               </button>
             </div>
 
-            <div className="flex-1 overflow-x-auto overflow-y-hidden p-3">
+            <div className="overflow-x-auto overflow-y-hidden p-2">
               {recommendations.length === 0 ? (
-                <p className="p-4 text-center text-xs text-muted">
+                <p className="p-4 text-center text-xs text-white/70">
                   No other videos from your subscriptions yet.
                 </p>
               ) : (
-                <div className="flex h-full snap-x snap-mandatory gap-3">
+                <div className="flex snap-x snap-mandatory gap-3">
                   {recommendations.map(({ video: v }) => (
                     <button
                       key={v.id}
                       onClick={() => selectVideo(v)}
                       aria-label={v.title}
                       title={v.title}
-                      className="relative aspect-video h-full max-h-[25%] shrink-0 snap-start overflow-hidden rounded-md bg-line transition hover:opacity-80"
+                      className="relative aspect-video h-16 shrink-0 snap-start overflow-hidden rounded-md bg-line transition hover:opacity-80"
                     >
                       {v.thumbnail_url && (
                         <Image src={v.thumbnail_url} alt="" fill className="object-cover" />
