@@ -107,6 +107,16 @@ export default function VideoModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
+  useEffect(() => {
+    function onFullscreenChange() {
+      if (!document.fullscreenElement && fullscreenEnabled) {
+        onClose();
+      }
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, [fullscreenEnabled, onClose]);
+
   if (!video || !currentVideo) return null;
 
   const recommendations = recommendedVideos.filter(
