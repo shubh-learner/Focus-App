@@ -5,10 +5,12 @@ import Image from "next/image";
 import type { SectionFeed, Video } from "@/lib/types";
 import VideoCard from "./VideoCard";
 import KeywordModal from "./KeywordModal";
+import { useMemo } from "react";
 
 export default function Section({
   data,
   colorful,
+  order,
   onDelete,
   onAddChannels,
   onKeywordsChanged,
@@ -16,6 +18,7 @@ export default function Section({
 }: {
   data: SectionFeed;
   colorful: boolean;
+  order: "time" | "random";
   onDelete: () => void;
   onAddChannels: () => void;
   onKeywordsChanged: () => void;
@@ -23,11 +26,22 @@ export default function Section({
 }) {
   const [editingChannelId, setEditingChannelId] = useState<string | null>(null);
 
-  const videos = data.channels
-    .flatMap((c) => c.videos.map((v) => ({ video: v, channel: c.channel })))
-    .sort(
+  const videos = useMemo(() => {
+    const flat = data.channels.flatMap((c) => c.videos.map((v) => ({ video: v, channel: c.channel })));
+
+    if (order === "random") {
+      const shuffled = [...flat];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    return flat.sort(
       (a, b) => new Date(b.video.published_at).getTime() - new Date(a.video.published_at).getTime()
     );
+  }, [data, order]);
 
   const editingChannel = data.channels.find((c) => c.channel.channel_id === editingChannelId);
 

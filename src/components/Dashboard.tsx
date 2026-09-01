@@ -21,6 +21,7 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
   const [searchingFor, setSearchingFor] = useState<string | null>(null);
   const [playing, setPlaying] = useState<Video | null>(null);
   const [colorful, setColorful] = useState(false);
+  const [order, setOrder] = useState<"time" | "random">("time");
   const [fullscreenEnabled, setFullscreenEnabled] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -51,6 +52,19 @@ export default function Dashboard({ userEmail }: { userEmail: string }) {
     setColorful((prev) => {
       const next = !prev;
       localStorage.setItem("focus:colorfulThumbnails", String(next));
+      return next;
+    });
+  }
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`focus:videoOrder:${userEmail}`);
+    if (saved === "random") setOrder("random");
+  }, [userEmail]);
+
+  function toggleOrder() {
+    setOrder((prev) => {
+      const next = prev === "time" ? "random" : "time";
+      localStorage.setItem(`focus:videoOrder:${userEmail}`, next);
       return next;
     });
   }
@@ -223,6 +237,18 @@ function applyFeed(newFeed: SectionFeed[]) {
           >
             Fullscreen
           </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleOrder();
+              openSettings();
+            }}
+            className={`rounded-md border px-3 py-1.5 text-xs transition ${
+              order === "random" ? "border-ink bg-ink text-paper" : "border-line bg-card text-muted hover:text-ink"
+            }`}
+          >
+            {order === "random" ? "Random" : "Order"}
+          </button>
         </div>
       </div>
 
@@ -255,6 +281,7 @@ function applyFeed(newFeed: SectionFeed[]) {
             <Section
               data={active}
               colorful={colorful}
+              order={order}
               onDelete={() => deleteSection(active.section.id)}
               onAddChannels={() => setSearchingFor(active.section.id)}
               onKeywordsChanged={() => loadFeed()}
