@@ -6,6 +6,7 @@ const nextConfig = {
       { protocol: "https", hostname: "yt3.ggpht.com" },
       { protocol: "https", hostname: "yt3.googleusercontent.com" },
     ],
+    unoptimized: true, // YouTube already serves properly sized thumbnails — skip Vercel's redundant re-optimization
   },
 };
 

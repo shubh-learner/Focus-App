@@ -115,7 +115,7 @@ export default function VideoModal({
     }
     document.addEventListener("fullscreenchange", onFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
-  }, [fullscreenEnabled, onClose]);
+  }, [fullscreenEnabled, onClose])
 
   if (!video || !currentVideo) return null;
 
